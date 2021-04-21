@@ -66,7 +66,7 @@ pool.on('error', error => {
 //     }
 // ];
 
-// Retreiving artist data from the database
+// Retrieving artist data from the database
 app.get('/artist', (req, res) => {
     console.log(`In /songs GET`);
     // 
@@ -82,11 +82,30 @@ app.get('/artist', (req, res) => {
 });
 
 app.post('/artist', (req, res) => {
-    artistList.push(req.body);
-    res.sendStatus(201);
+    const artist = {
+        name: req.body.name,
+        birthdate: req.body.birthdate
+    };
+
+    //Create INSERT query to write new things into DB
+    const queryText = `INSERT INTO "artist" (name, birthdate)
+                        VALUES ($1, $2);`;
+    pool.query(queryText, [req.body.name, req.body.birthdate])
+        .then(result => {
+            console.log('New artist is..', result);
+            // validation to only send an CREATED status if .rows property is NOT empty.
+            if(result.row !== []) {
+            res.sendStatus(201);
+            }
+        })
+        .catch(error => {
+            console.log(`Something went wrong with ${queryText}`, error);
+            res.sendStatus(500);
+        })
+    
 });
 
-//Retreiving song data from the Database
+//Retrieving song data from the Database
 app.get('/song', (req, res) => {
     console.log(`In /songs GET`);
     // res.send(songList);
