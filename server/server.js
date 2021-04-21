@@ -121,8 +121,27 @@ app.get('/song', (req, res) => {
 });
 
 app.post('/song', (req, res) => {
-    songList.push(req.body);
-    res.sendStatus(201);
+    const song = {
+        title: req.body.title,
+        length: req.body.length,
+        released: req.body.released
+    };
+
+    
+
+    const queryText = `INSERT INTO "song" (title, length, released)
+                        VALUES ($1, $2, $3);`;
+    pool.query(queryText, [req.body.title, req.body.length, req.body.released])
+        .then(result => {
+            console.log('The new song is...', result);
+            if(result.row !== []) {
+            res.sendStatus(201);
+            }
+        })
+        .catch(error => {
+            console.log(`Something went wrong with ${queryText}`, error);
+            res.sendStatus(500);
+        })
 });
 
 
